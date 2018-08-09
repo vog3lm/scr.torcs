@@ -9,11 +9,11 @@ Torcs Simulated Car Racing Driver Client in Python.
 * Sensor Data Recorder
 * Action Data Recorder
 * Realtime Car Monitor
-* 
+
 ### Get Started
 ##### Dependencies
 
-At first you will have to install Torcs - The Open Race Car Simulator and patch it. To do this stick to this [manual](https://github.com/vog3lm/torcs-1.3.7). Tested under Debian 4.16.16-2kali2 64it.
+At first you will have to install Torcs - The Open Race Car Simulator and patch it. To do this stick to this [manual](https://github.com/vog3lm/torcs-1.3.7). Tested under Debian 4.16.16-2kali2 64it. Then install the following core dependencies.
 
 ```
 pip install getopts
