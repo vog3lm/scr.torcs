@@ -1,0 +1,179 @@
+<!doctype html>
+<html>
+    <head>
+        <title>{{title}}</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <script type="text/javascript" src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+        <script type="text/javascript">
+
+            function V13wEv3ntD1spatch3r(){
+                var events = [];
+                var issues = [];
+                this.append = function(holder){
+                    for(var i=0; i<holder.events.length; i++){
+                        var key = holder.events[i];
+                        events.push(key);
+                        issues.push(holder.issues[i]);
+                    }
+                    return this;
+                }
+                this.register = function(){
+                    if(null == events || null == issues || 0 == events.length || 0 == issues.length){
+                        throw 'view event dispachter not decorated. call onDecorate/onAppend first!'
+                        return this;
+                    }
+                    for (var i=0; i<events.length; i++) {
+                        $('body').on(events[i],dispatch);
+                    };
+                    return this;
+                }
+                this.unleash = function(){
+                    $("img").each(function(){ // make images clickable
+                        var element = $(this)
+                        if(element.attr('call')){
+                            element.on('click',function(){
+                                var tmp = $(this)
+                                $('body').trigger(tmp.attr('call'),{call:element.attr('call'),id:element.attr('id'),url:tmp.attr('url')});
+                            });
+                        }
+                    });
+                    $("a").each(function(){ // make ankors clickable
+                        var element = $(this)
+                        if(element.attr('call')){
+                            element.on('click',function(){
+                                var tmp = $(this)
+                                $('body').trigger(tmp.attr('call'),{call:element.attr('call'),id:element.attr('id'),url:tmp.attr('url')});
+                            });
+                        }
+                    });
+                    $('form').keypress(function(e) {
+                        if (e.which == 13) {
+                            e.preventDefault();
+                            var element = $(this)               
+                            if(element.attr('call')){
+                                $('body').trigger(element.attr('call'),{call:element.attr('call'),id:element.attr('id'),url:element.attr('url')});
+                            }
+                        }
+                    });
+                    return this;
+                }
+                function dispatch(evt,data){
+                    try {
+                        if(events == null || issues == null){
+                            throw 'view event dispachter not decorated. call onDecorate first!'
+                        }
+                        index = events.indexOf(evt.type)
+                        if(index < 0){
+                            throw 'view event Intel not Found!'
+                        }
+                        issues[index](data)
+                    } catch(error) {
+                        $('body').trigger('loading-stop');
+                        console.error(error)
+                    }
+                }
+            };
+
+            function Sock3tEv3ntD1spatch3r(ns){
+                if(!ns){ns = 'sio';}
+                var namespace = ns;
+                var socketobj = null;
+                var events = {};
+                events['connect-'+ns] = (data) => {
+                    socketobj = io.connect(location.protocol+'//'+document.domain+':'+location.port+'/'+namespace);
+                    socketobj.on('connected', function(data) {
+                        $('body').trigger(namespace+'-connected',data)  
+                    });
+                    socketobj.on('response', function(data) {
+                        $('body').trigger(data.call,data)  
+                    });
+                }
+                events['disconnect-'+ns] = (data) => {
+                	$('body').trigger(namespace+'-disconnected',{}) 
+                }
+                events['send-'+ns] = (data) => {socketobj.emit('request',Object.assign({},data, {'call':'request'}))}
+
+                this.create = function(dispatcher){
+                    if(dispatcher){
+                        dispatcher.append({'events':Object.keys(events),'issues':Object.values(events)})
+                    }
+                }
+            };
+
+            function PageEv3ntL1sten3r(){
+                var events = {
+                    'monitor-connected':(data) => {
+                        var element = $('status');
+                        element.text('connected');
+                        element.css({'background':'rgba(170,255,0)'})
+                    }
+                    ,'monitor-sensors':(data) => {
+                        $('sensors').text(JSON.stringify(data));
+                    }
+                    ,'monitor-actions':(data) => {
+                        $('actions').text(JSON.stringify(data));
+                    }
+                }
+                this.create = function(dispatcher){
+                    if(dispatcher){
+                        dispatcher.append({'events':Object.keys(events),'issues':Object.values(events)})
+                    }
+                }
+            }
+
+            var dispatcher = new V13wEv3ntD1spatch3r
+            $(document).ready(function(){
+                new Sock3tEv3ntD1spatch3r('monitor').create(dispatcher);
+                new PageEv3ntL1sten3r().create(dispatcher);
+            });
+            $(window).load(function() {
+                dispatcher.register().unleash();
+                $('body').trigger('connect-monitor',{'call':'connect-monitor','id':'doc-load'});
+            });
+
+        </script>
+
+        <style type="text/css">
+
+            * { padding:0px; margin:0px}
+            html, body { height:100%; width:100%; }
+
+
+            status{
+                position:absolute;
+                bottom:0px;
+                width:100%;
+                text-align:center;
+                font-size:2rem;
+                background:rgba(255,0,130);
+            }
+
+            sensors{
+                position:relative;
+                display:block;
+                width:100%;
+                height:50%;
+                font-size:2rem;
+                word-break:break-all;
+            }
+
+            actions{
+                position:relative;
+                display:block;
+                width:100%;
+                height:50%;
+                font-size:2rem;
+                word-break:break-all;
+            }
+
+        </style>
+
+
+    </head>
+    <body>
+        <status>disconnected</status>
+        <sensors>no data</sensors>
+        <actions>no data</actions>
+    </body>
+</html>
